@@ -76,6 +76,8 @@ Sometimes, sending only the `user-agent` is enough. At other times, you may need
 
 To identify the user-agent sent by your browser, press F12 and open the Network tab. Reload the page. Select the first request and examine Request Headers.
 
+![alt text](images/Amazon (1).jpg)
+
 
 
 
