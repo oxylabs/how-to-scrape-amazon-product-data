@@ -76,7 +76,7 @@ Sometimes, sending only the `user-agent` is enough. At other times, you may need
 
 To identify the user-agent sent by your browser, press F12 and open the Network tab. Reload the page. Select the first request and examine Request Headers.
 
-![](https://oxylabs.io/_next/image?url=https%3A%2F%2Foxylabs.io%2Foxylabs-web%2FZpBeQh5LeNNTxEWk_ZmK9sZm069VX1icx_Amazon-1-.jpg%3Fauto%3Dformat%2Ccompress&w=1200&q=75)
+![](https://raw.githubusercontent.com/oxylabs/how-to-scrape-amazon-product-data/main/images/Amazon%20(1).jpg?token=GHSAT0AAAAAACW62VSTLRWZD5SJMWB7ZKI6ZWYLXUA)
 
 
 
