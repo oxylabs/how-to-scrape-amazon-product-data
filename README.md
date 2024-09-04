@@ -4,7 +4,7 @@
 
 You can find an extended version on our [blog](https://oxylabs.io/blog/scrape-amazon-product-data).
 
-This guide uses Oxylabs [Amazon Scraper](https://oxylabs.io/products/scraper-api/ecommerce/amazon) along with Python to scrape the following data points:
+This guide uses Python to scrape the following data points:
 
 - Product name
 - Product rating
@@ -156,19 +156,329 @@ The product name or title is located in a `span` element with its id `productTit
 title_element = soup.select_one('#productTitle')
 ```
 
+Send the CSS selector to the `select_one` method, which returns an element instance. You can extract information from the text using the `text` attribute.
+
+```
+title = title_element.text
+```
+
+Upon printing, you will see that there are few white spaces. To fix that, add `.strip()` function call as follows:
+
+```
+title = title_element.text.strip()
+```
+
+### 3. Locating and scraping product rating
+
+Create a selector for rating:
+
+```
+#acrPopover
+```
+
+The following statement can select the element that contains the rating:
+
+```
+rating_element = soup.select_one('#acrPopover')
+```
+
+Note that the rating value is actually in the title attribute:
+
+```
+rating_text = rating_element.attrs.get('title')
+print(rating_text)
+# prints '4.6 out of 5 stars'
+```
+
+Lastly, use the `replace` method to get the number:
+
+```
+rating = rating_text.replace('out of 5 stars','')
+```
+
+### 4. Locating and scraping product price
+
+The product price is located in two places: below the product title and on the Buy Now box. You can use either of these tags.
+
+Create a CSS selector for the price:
+
+```
+span.a-offscreen
+```
+
+The CSS selector can be passed to the `select_one` method of BeautifulSoup as follows:
+
+```
+price_element = soup.select_one('span.a-offscreen')
+```
+
+You can now print the price:
+
+```
+print(price_element.text)
+```
+
+### 5. Locating and scraping product image
+
+Let's scrape the default image. This image has the CSS selector as `#landingImage`. Write the following to get the image URL from the `src` attribute:
+
+```
+image_element = soup.select_one('#landingImage')
+image = image_element.attrs.get('src')
+```
+
+### 6. Locating and scraping product description
+
+The methodology remains the same — create a CSS selector and use the `select_one` method.
+
+```
+#productDescription
+```
+
+You can extract the element as follows:
+
+```
+description_element = soup.select_one('#productDescription').text.strip()
+print(description_element)
+```
+
+### Handling product listing
+
+To reach the product information, begin with product listing or category pages.
+
+For example, [here](https://www.amazon.com/b?node=12097479011) is the category page for over-ear headphones.
+
+Notice that all the products are contained in a `div` with the special attribute `[data-asin]`. In the `div`, all the product links are in an `h2` tag.
+
+The CSS Selector is as follows:
+
+```
+[data-asin] h2 a
+```
+
+You can read the `href` attribute of this selector and run a loop. However, note that the links will be relative. You would need to use the `urljoin` method to parse these links.
+
+```
+from urllib.parse import urljoin
+
+def parse_listing(listing_url):
+    global visited_urls
+    response = requests.get(listing_url, headers=custom_headers)
+    print(response.status_code)
+    soup_search = BeautifulSoup(response.text, "lxml")
+    link_elements = soup_search.select("[data-asin] h2 a")
+    page_data = []
+
+    for link in link_elements:
+        full_url = urljoin(listing_url, link.attrs.get("href"))
+        if full_url not in visited_urls:
+            visited_urls.add(full_url)
+            print(f"Scraping product from {full_url[:100]}", flush=True)
+            product_info = get_product_info(full_url)
+            if product_info:
+                page_data.append(product_info)
+```
+
+#### Handling pagination
+
+The link to the next page contains the text "Next". Look for this link using the contains operator of CSS as follows:
+
+```
+    next_page_el = soup_search.select_one('a.s-pagination-next')
+    if next_page_el:
+        next_page_url = next_page_el.attrs.get('href')
+        next_page_url = urljoin(listing_url, next_page_url)
+        print(f'Scraping next page: {next_page_url}', flush=True)
+        page_data += parse_listing(next_page_url)
+
+    return page_data
+```
+
+## 8. Exporting scraped product data to a CSV file
+
+The scraped data is being returned as a dictionary. It is intentional. 
+
+You can create a list that contains all the scraped products:
+
+```
+def main():
+    data = []
+    search_url = "https://www.amazon.com/s?k=bose&rh=n%3A12097479011&ref=nb_sb_noss"
+    data = parse_listing(search_url)
+```
+
+This `page_data` can then be used to create a Pandas `DataFrame` object:
+
+```
+    df = pd.DataFrame(data)
+    df.to_csv("headphones.csv", index=False)
+```
+
+## Reviewing the final script
+
+Putting together everything, here is the final script:
+
+```
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+import pandas as pd
+
+custom_headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+    'Accept-Language': 'da, en-gb, en',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Referer': 'https://www.google.com/'
+}
+
+visited_urls = set()
+
+def get_product_info(url):
+    response = requests.get(url, headers=custom_headers)
+    if response.status_code != 200:
+        print(f"Error in getting webpage: {url}")
+        return None
+
+    soup = BeautifulSoup(response.text, "lxml")
+
+    title_element = soup.select_one("#productTitle")
+    title = title_element.text.strip() if title_element else None
+
+    price_element = soup.select_one('span.a-offscreen')
+    price = price_element.text if price_element else None
+
+    rating_element = soup.select_one("#acrPopover")
+    rating_text = rating_element.attrs.get("title") if rating_element else None
+    rating = rating_text.replace("out of 5 stars", "") if rating_text else None
+
+    image_element = soup.select_one("#landingImage")
+    image = image_element.attrs.get("src") if image_element else None
+
+    description_element = soup.select_one("#productDescription")
+    description = description_element.text.strip() if description_element else None
+
+    return {
+        "title": title,
+        "price": price,
+        "rating": rating,
+        "image": image,
+        "description": description,
+        "url": url
+    }
 
 
+def parse_listing(listing_url):
+    global visited_urls
+    response = requests.get(listing_url, headers=custom_headers)
+    print(response.status_code)
+    soup_search = BeautifulSoup(response.text, "lxml")
+    link_elements = soup_search.select("[data-asin] h2 a")
+    page_data = []
+
+    for link in link_elements:
+        full_url = urljoin(listing_url, link.attrs.get("href"))
+        if full_url not in visited_urls:
+            visited_urls.add(full_url)
+            print(f"Scraping product from {full_url[:100]}", flush=True)
+            product_info = get_product_info(full_url)
+            if product_info:
+                page_data.append(product_info)
+
+    next_page_el = soup_search.select_one('a.s-pagination-next')
+    if next_page_el:
+        next_page_url = next_page_el.attrs.get('href')
+        next_page_url = urljoin(listing_url, next_page_url)
+        print(f'Scraping next page: {next_page_url}', flush=True)
+        page_data += parse_listing(next_page_url)
+
+    return page_data
 
 
+def main():
+    data = []
+    search_url = "https://www.amazon.com/s?k=bose&rh=n%3A12097479011&ref=nb_sb_noss"
+    data = parse_listing(search_url)
+    df = pd.DataFrame(data)
+    df.to_csv("headphones.csv", orient='records')
 
 
+if __name__ == '__main__':
+    main()
+```
 
+## An easier solution to extract Amazon data
 
+You can simplify the whole process with Oxylabs [Amazon Scraper](https://oxylabs.io/products/scraper-api/ecommerce/amazon) (a free trial is available).
 
+### Scraping products from search results
 
+Extract product data with the following code:
 
+```
+import requests
+from pprint import pprint
 
+# Structure payload.
+payload = {
+    'source': 'amazon_search',
+    'query': 'bose',  # Search for "bose"
+    'start_page': 1,
+    'pages': 10,
+    'parse': True,
+    'context': [
+        {'key': 'category_id', 'value': 12097479011}  # category id for headphones
+    ],
+}
 
+# Get response
+response = requests.request(
+    'POST',
+    'https://realtime.oxylabs.io/v1/queries',
+    auth=('USERNAME', 'PASSWORD'),
+    json=payload,
+)
 
+# Print prettified response to stdout.
+pprint(response.json())
+```
 
+Notice how it requests 10 pages beginning with the page 1. Also, we limit the search to category ID 12097479011, which is Amazon's category ID for headphones. You’ll get the data in JSON format:
 
+![](https://oxylabs.io/_next/image?url=https%3A%2F%2Foxylabs.io%2Foxylabs-web%2FZpBeRh5LeNNTxEWn_0dcb25ef-f532-49c2-8ef5-5960d9773bd3_amazon_product_search.png%3Fauto%3Dformat%2Ccompress&w=1200&q=75)
+
+### Extracting product details
+
+You only need the product URL, irrespective of the country in the Amazon store. The only change in code is the payload. 
+
+The following payload extracts details, such as name, price, stock availability, description, and more, for the Bose QC 45:
+
+```
+payload = {
+    'source': 'amazon',
+    'url': 'https://www.amazon.com/dp/B098FKXT8L',
+    'parse': True
+}
+```
+
+The output:
+
+![](https://oxylabs.io/_next/image?url=https%3A%2F%2Foxylabs.io%2Foxylabs-web%2FZpBeRx5LeNNTxEWo_fddcfa94-6d5c-4a61-b9ff-7035108bf36d_amazon_product_details.png%3Fauto%3Dformat%2Ccompress&w=1200&q=75)
+
+### Scraping products by ASIN
+
+Another way to get data is by the ASIN of a product. You need to modify the payload:
+
+```
+payload = {
+    'source': 'amazon_product',
+    'domain': 'co.uk',
+    'query': 'B098FKXT8L',
+    'parse': True,
+    'context': [
+        {'key': 'autoselect_variant', 'value': True}
+    ]
+}
+```
+
+Note the optional parameter `domain`. Use this parameter to get Amazon data from any domain, such as amazon.co.uk.
