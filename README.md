@@ -4,6 +4,23 @@
 
 You can find an extended version of this guide on our [blog](https://oxylabs.io/blog/scrape-amazon-product-data).
 
+- [Setting up](#setting-up)
+  + [Installing packages](#installing-packages)
+- [Scraping product data](#scraping-product-data)
+  + [1. Sending a GET request with custom headers](#1.-sending-a-get-request-with-custom-headers)
+  + [2. Locating and scraping product name](#2.-locating-and-scraping-product-name)
+  + [3. Locating and scraping product rating](#3.-locating-and-scraping-product-rating)
+  + [4. Locating and scraping product price](#4.-locating-and-scraping-product-price)
+  + [5. Locating and scraping product image](#5.-locating-and-scraping-product-image)
+  + [6. Locating and scraping product description](#6.-locating-and-scraping-product-description)
+  + [7. Handling product listing](#7.-handling-product-listing)
+  + [8. Exporting scraped product data to a CSV file](#8.-exporting-scraped-product-data-to-a-CSV-file)
+- [Reviewing the final script](#reviewing-the-final-script)
+- [An easier solution to extract Amazon data](#an-easier-solution-to-extract-Amazon-data)
+  + [Scraping products from search results](#scraping-products-from-search-results)
+  + [Extracting product details](#extracting-product-details)
+  + [Scraping products by ASIN](#scraping-products-by-ASIN)
+
 This guide uses Python to scrape the following data points:
 
 - Product name
@@ -242,7 +259,7 @@ description_element = soup.select_one('#productDescription').text.strip()
 print(description_element)
 ```
 
-### Handling product listing
+### 7. Handling product listing
 
 To reach the product information, begin with product listing or category pages.
 
