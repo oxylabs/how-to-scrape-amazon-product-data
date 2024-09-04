@@ -12,7 +12,7 @@ This guide uses Oxylabs [Amazon Scraper](https://oxylabs.io/products/scraper-api
 - Product images
 - Product description
 
-## Setting up for scraping
+## Setting up
 
 Create a folder to save your code files. Also, creating a virtual environment is generally a good practice.
 
@@ -124,7 +124,45 @@ The category page displays the product title, product image, product rating, pro
 Let's examine the structure of the product details page.
 
 Open a product URL, such as [this](https://www.amazon.com/Bose-QuietComfort-45-Bluetooth-Canceling-Headphones/dp/B098FKXT8L), in Chrome or any other modern browser, right-click the product title, and select Inspect. You will see that the HTML markup of the product title is highlighted.
- g
+
+![](https://oxylabs.io/_next/image?url=https%3A%2F%2Foxylabs.io%2Foxylabs-web%2FZpBeQx5LeNNTxEWl_ZmK9xZm069VX1ic0_Amazon-2-.jpg%3Fauto%3Dformat%2Ccompress&w=1200&q=75)
+
+You will see that it is a span tag with its id attribute set to `productTitle`.
+
+Similarly, if you right-click the price and select Inspect, you will see the HTML markup of the price.
+
+![](https://oxylabs.io/_next/image?url=https%3A%2F%2Foxylabs.io%2Foxylabs-web%2FZpBeRR5LeNNTxEWm_ZmK905m069VX1ic4_Amazon-3-.jpg%3Fauto%3Dformat%2Ccompress&w=1200&q=75)
+
+You can see that the dollar component of the price is in a span tag with the class `a-price-whole`, and the cents component is in another span tag with the class set to `a-price-fraction`.
+
+Similarly, you can locate the rating, image, and description.
+
+### 1. Sending a GET request with custom headers
+
+```
+from bs4 import BeautifulSoup
+
+response = requests.get(url, headers=custom_headers)
+soup = BeautifulSoup(response.text, 'lxml')
+```
+
+This guide uses CSS selectors. You can now use the `Soup` object to query for specific information.
+
+### 2. Locating and scraping product name
+
+The product name or title is located in a `span` element with its id `productTitle`. It's easy to select elements using a unique ID.
+
+```
+title_element = soup.select_one('#productTitle')
+```
+
+
+
+
+
+
+
+
 
 
 
