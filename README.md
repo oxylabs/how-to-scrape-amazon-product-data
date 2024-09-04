@@ -294,7 +294,7 @@ The link to the next page contains the text "Next". Look for this link using the
     return page_data
 ```
 
-## 8. Exporting scraped product data to a CSV file
+### 8. Exporting scraped product data to a CSV file
 
 The scraped data is being returned as a dictionary. It is intentional. 
 
