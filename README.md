@@ -6,6 +6,16 @@
 
 You can find an extended version of this guide on our [blog](https://oxylabs.io/blog/scrape-amazon-product-data).
 
+This guide uses Python to scrape the following data points:
+
+- Product name
+- Product rating
+- Product price
+- Product images
+- Product description
+
+## Contents
+
 - [Setting up](#setting-up)
   + [Installing packages](#installing-packages)
 - [Scraping product data](#scraping-product-data)
@@ -22,14 +32,6 @@ You can find an extended version of this guide on our [blog](https://oxylabs.io/
   + [Scraping products from search results](#scraping-products-from-search-results)
   + [Extracting product details](#extracting-product-details)
   + [Scraping products by ASIN](#scraping-products-by-ASIN)
-
-This guide uses Python to scrape the following data points:
-
-- Product name
-- Product rating
-- Product price
-- Product images
-- Product description
 
 ## Setting up
 
