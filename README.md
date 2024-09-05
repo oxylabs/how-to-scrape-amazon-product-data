@@ -6,7 +6,7 @@
 
 You can find an extended version of this guide on our [blog](https://oxylabs.io/blog/scrape-amazon-product-data).
 
-This guide uses Python to scrape the following data points:
+This guide uses Python to scrape the following data points from Amazon:
 
 - Product name
 - Product rating
