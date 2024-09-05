@@ -91,7 +91,7 @@ Amazon knows this request was not using a browser and thus blocks it.
 
 Many websites employ this practice. Amazon will block your requests and return an error code beginning with 500 or sometimes even 400.
 
-The solution is simple in most cases. You can send the headers along with your request that a browser would.
+The solution is simple in most cases. You can send HTTP headers along with your request just like an actual browser.
 
 Sometimes, sending only the `user-agent` is enough. At other times, you may need to send more headers. A good example is sending the `accept-language` header.
 
@@ -136,7 +136,7 @@ It’s also a good idea to rotate different `User-Agent` strings and try your re
 
 ## Scraping product data
 
-When web scraping Amazon products, typically, you would work with two categories of pages — the category page and the product details page.
+When scraping Amazon products, typically, you would work with two categories of pages — the category page and the product details page.
 
 For example, open [this](https://www.amazon.com/b?node=12097479011) or search for Over-Ear Headphones on Amazon. The page that shows the search results is the category page.
 
@@ -470,7 +470,7 @@ Notice how it requests 10 pages beginning with the page 1. Also, we limit the se
 
 ### Extracting product details
 
-You only need the product URL, irrespective of the country in the Amazon store. The only change in code is the payload. 
+You only need the product URL, regardless of the country where the Amazon store is located. The only code change is the payload.
 
 The following payload extracts details, such as name, price, stock availability, description, and more, for the Bose QC 45:
 
